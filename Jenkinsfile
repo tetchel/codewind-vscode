@@ -23,6 +23,11 @@ spec:
         skipStagesAfterUnstable()
     }
 
+    environment {
+        // https://stackoverflow.com/a/43264045
+        HOME="."
+    }
+
     stages {
         stage('Build') {
             steps {
