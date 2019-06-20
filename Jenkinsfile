@@ -12,8 +12,10 @@ spec:
   - name: node
     image: node:lts
     tty: true
-    command: [ "/usr/local/bin/uid_entrypoint" ]
-    args: [ "cat" ]
+    command:
+        - /usr/local/bin/uid_entrypoint
+    args:
+        - /usr/bin/env/bash
 """
     	}
 	}
@@ -25,8 +27,8 @@ spec:
 
     stages {
         stage('Build') {
-            container("node"){
-                steps {
+            steps {
+                container("node"){
                     dir('dev') {
                         sh "whoami"
                         sh "npm run vscode:prepublish"
@@ -37,8 +39,8 @@ spec:
         }
 
         stage('Deploy') {
-            container("node"){
-                steps {
+            steps {
+                container("node") {
                     unstash 'dev'
 
                     sh "npm i -g vsce"
