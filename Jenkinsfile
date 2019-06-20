@@ -35,7 +35,6 @@ spec:
                     dir('dev') {
                         sh "npm run vscode:prepublish"
                     }
-                    stash includes: '**/*', name: 'dev'
                 }
             }
         }
@@ -43,13 +42,13 @@ spec:
         stage('Deploy') {
             steps {
                 container("node") {
-                    unstash 'dev'
-
                     sh "npm i -g vsce"
                     dir('dev') {
-                        sh 'vsce package && \
-                            export artifact_name="$(basename *.vsix)" && \
-                            mv -v $artifact_name ..'
+                        sh '''
+                            vsce package
+                            export artifact_name="$(basename *.vsix)"
+                            mv -v $artifact_name ..
+                        '''
                     }
                     sh "ci-scripts/deploy.sh || >&2 echo 'Deploy failed!'"
                 }
