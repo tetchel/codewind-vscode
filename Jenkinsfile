@@ -12,10 +12,6 @@ spec:
   - name: node
     image: node:lts
     tty: true
-    command:
-        - /usr/local/bin/uid_entrypoint
-    args:
-        - /usr/bin/env/bash
 """
     	}
 	}
