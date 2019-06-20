@@ -25,26 +25,30 @@ spec:
 
     stages {
         stage('Build') {
-            steps {
-                dir('dev') {
-                    sh "whoami"
-                    sh "npm run vscode:prepublish"
+            container("node"){
+                steps {
+                    dir('dev') {
+                        sh "whoami"
+                        sh "npm run vscode:prepublish"
+                    }
+                    stash includes: '**/*', name: 'dev'
                 }
-                stash includes: '**/*', name: 'dev'
             }
         }
 
         stage('Deploy') {
-            steps {
-                unstash 'dev'
+            container("node"){
+                steps {
+                    unstash 'dev'
 
-                sh "npm i -g vsce"
-                dir('dev') {
-                    sh 'vsce package && \
-                        export artifact_name="$(basename *.vsix)" && \
-                        mv -v $artifact_name ..'
+                    sh "npm i -g vsce"
+                    dir('dev') {
+                        sh 'vsce package && \
+                            export artifact_name="$(basename *.vsix)" && \
+                            mv -v $artifact_name ..'
+                    }
+                    sh "ci-scripts/deploy.sh || >&2 echo 'Deploy failed!'"
                 }
-                sh "ci-scripts/deploy.sh || >&2 echo 'Deploy failed!'"
             }
         }
     }
