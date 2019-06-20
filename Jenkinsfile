@@ -28,7 +28,6 @@ spec:
             steps {
                 container("node") {
                     dir('dev') {
-                        sh "whoami"
                         sh "npm run vscode:prepublish"
                     }
                     stash includes: '**/*', name: 'dev'
