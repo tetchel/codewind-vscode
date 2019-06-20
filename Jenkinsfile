@@ -12,6 +12,8 @@ spec:
   - name: node
     image: node:lts
     tty: true
+    command:
+      - cat
 """
     	}
 	}
@@ -24,7 +26,7 @@ spec:
     stages {
         stage('Build') {
             steps {
-                container("node"){
+                container("node") {
                     dir('dev') {
                         sh "whoami"
                         sh "npm run vscode:prepublish"
