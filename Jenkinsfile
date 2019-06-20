@@ -42,10 +42,10 @@ spec:
         stage('Deploy') {
             steps {
                 container("node") {
-                    sh "npm i -g vsce"
                     dir('dev') {
                         sh '''
-                            vsce package
+                            npm i vsce
+                            npx vsce package
                             export artifact_name="$(basename *.vsix)"
                             mv -v $artifact_name ..
                         '''
