@@ -50,7 +50,8 @@ spec:
                             npx vsce package
                             export artifact_name=$(basename *.vsix)
                             # rename to have datetime for clarity + prevent collisions
-                            mv -v $artifact_name ${artifact_name/.vsix/_$(date +'%F-%H%M').vsix}
+                            export datetime=$(date +'%F-%H%M')
+                            mv -v $artifact_name ${artifact_name/.vsix/_$datetime.vsix}
                             export artifact_name=$(basename *.vsix)
                         '''
                     }
