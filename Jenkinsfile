@@ -63,9 +63,7 @@ spec:
                     '''
 
                     // Note there must be exactly one .vsix
-                    stash includes: 'last_build.txt, *.vsix', name: 'deploy'
-
-
+                    stash includes: 'last_build.txt, *.vsix', name: 'deployables'
                 }
             }
         }
@@ -73,7 +71,7 @@ spec:
             agent any
             steps {
                 sshagent (['projects-storage.eclipse.org-bot-ssh']) {
-                    unstash 'deploy'
+                    unstash 'deployables'
                     sh '''
                         ls -lA
                         export sshHost="genie.codewind@projects-storage.eclipse.org"
