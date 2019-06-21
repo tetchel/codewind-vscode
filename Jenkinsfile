@@ -61,12 +61,16 @@ spec:
                         printf "Last build: $artifact_name from $GIT_BRANCH:\n\n$commit_info" > $build_info_file
                     '''
 
+                    // Note there must be exactly one .vsix
+                    stash includes: 'last_build.txt, *.vsix', name: 'deploy'
+
                     sshagent (['projects-storage.eclipse.org-bot-ssh']) {
+                        unstash 'deploy'
                         sh '''
                             export sshHost="genie.codewind@projects-storage.eclipse.org"
                             export deployDir="/home/data/httpd/download.eclipse.org/codewind/codewind-vscode/$(date +'%F')"
                             ssh $sshHost mkdir -p $deployDir
-                            scp -v $artifact_name $build_info_file ${sshHost}:${deployDir}
+                            scp -v *.vsix $build_info_file ${sshHost}:${deployDir}
                         '''
                     }
                 }
