@@ -12,8 +12,8 @@ spec:
   - name: node
     image: node:lts
     tty: true
-    command:
-      - cat
+    command: [ "/usr/local/bin/uid_entrypoint" ]
+    args: [ "cat" ]
 """
     	}
 	}
@@ -49,7 +49,7 @@ spec:
                             npx vsce package
                             export artifact_name="$(basename *.vsix)"
                             # rename to have datetime for clarity + prevent collisions
-                            mv $artifact_name ../${artifact_name}_$(date +'%F-%H%M')
+                            mv $artifact_name ../${artifact_name}_$(date +'%F-%H%M').vsix
                             export artifact_name="$(basename ../*.vsix)"
                         '''
                     }
@@ -67,6 +67,7 @@ spec:
                     sshagent (['projects-storage.eclipse.org-bot-ssh']) {
                         unstash 'deploy'
                         sh '''
+                            ls -lA
                             export sshHost="genie.codewind@projects-storage.eclipse.org"
                             export deployDir="/home/data/httpd/download.eclipse.org/codewind/codewind-vscode/$(date +'%F')"
                             ssh $sshHost mkdir -p $deployDir
