@@ -40,10 +40,10 @@ spec:
                             # Package for prod
                             npm i vsce
                             npx vsce package
-                            export artifact_name=$(basename *.vsix)
+
                             # rename to have datetime for clarity + prevent collisions
-                            mv -v $artifact_name ${artifact_name/.vsix/_$(date +'%F-%H%M').vsix}
                             export artifact_name=$(basename *.vsix)
+                            mv -v $artifact_name ${artifact_name/.vsix/_$(date +'%F-%H%M').vsix}
                         '''
 
                         // Note there must be exactly one .vsix
@@ -57,7 +57,7 @@ spec:
             steps {
                 sshagent (['projects-storage.eclipse.org-bot-ssh']) {
                     unstash 'deployables'
-                    sh '''
+                    sh '''#!/usr/bin/env bash
                         ls -lA
                         export sshHost="genie.codewind@projects-storage.eclipse.org"
                         export deployDir="/home/data/httpd/download.eclipse.org/codewind/codewind-vscode/${GIT_BRANCH}/${BUILD_ID}"
