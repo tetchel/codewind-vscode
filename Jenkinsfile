@@ -77,7 +77,7 @@ spec:
                     sh '''
                         ls -lA
                         export sshHost="genie.codewind@projects-storage.eclipse.org"
-                        export deployDir="/home/data/httpd/download.eclipse.org/codewind/codewind-vscode/${GIT_BRANCH}/${BUILD_ID}
+                        export deployDir="/home/data/httpd/download.eclipse.org/codewind/codewind-vscode/${GIT_BRANCH}/${BUILD_ID}"
                         ssh $sshHost mkdir -p $deployDir
                         scp -v *.vsix $build_info_file ${sshHost}:${deployDir}
                     '''
