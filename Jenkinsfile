@@ -45,13 +45,12 @@ spec:
             steps {
                 container("node") {
                     dir('dev') {
-                        sh '''
+                        sh '''#!/usr/bin/env bash
                             npm i vsce
                             npx vsce package
                             export artifact_name=$(basename *.vsix)
                             # rename to have datetime for clarity + prevent collisions
-                            export datetime=$(date +'%F-%H%M')
-                            mv -v $artifact_name ${artifact_name/.vsix/_$datetime.vsix}
+                            mv -v $artifact_name ${artifact_name/.vsix/_$(date +'%F-%H%M').vsix}
                             export artifact_name=$(basename *.vsix)
                         '''
                     }
