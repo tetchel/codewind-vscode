@@ -46,14 +46,8 @@ spec:
                             export artifact_name=$(basename *.vsix)
                         '''
 
-                        // Update the last_build file
-                        sh '''#!/usr/bin/env bash
-                            commit_info="$(git log -3 --pretty='%h by %an - %s\n')"
-                            printf "Last build #${BUILD_ID}: $artifact_name from $GIT_BRANCH:\n\n$commit_info" > last_build.txt
-                        '''
-
                         // Note there must be exactly one .vsix
-                        stash includes: 'last_build.txt, *.vsix', name: 'deployables'
+                        stash includes: '*.vsix', name: 'deployables'
                     }
                 }
             }
@@ -68,7 +62,9 @@ spec:
                         export sshHost="genie.codewind@projects-storage.eclipse.org"
                         export deployDir="/home/data/httpd/download.eclipse.org/codewind/codewind-vscode/${GIT_BRANCH}/${BUILD_ID}"
                         ssh $sshHost mkdir -p $deployDir
-                        scp *.vsix last_build.txt ${sshHost}:${deployDir}
+                        scp *.vsix ${sshHost}:${deployDir}s
+                        # echo the downloadable url
+                        echo "Uploaded to https://download.eclipse.org${deployDir##*download.eclipse.org}"
                     '''
                 }
             }
