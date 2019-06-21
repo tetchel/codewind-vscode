@@ -12,8 +12,6 @@ spec:
   - name: node
     image: node:lts
     tty: true
-    #command: [ "/usr/local/bin/uid_entrypoint" ]
-    #args: [ "cat" ]
     command:
       - cat
 """
@@ -35,17 +33,11 @@ spec:
             steps {
                 container("node") {
                     dir('dev') {
-                        sh "npm run vscode:prepublish"
-                    }
-                }
-            }
-        }
-
-        stage('Package') {
-            steps {
-                container("node") {
-                    dir('dev') {
                         sh '''#!/usr/bin/env bash
+                            # Test compilation to catch any errors
+                            npm run vscode:prepublish
+
+                            # Package for prod
                             npm i vsce
                             npx vsce package
                             export artifact_name=$(basename *.vsix)
@@ -55,10 +47,9 @@ spec:
                         '''
 
                         // Update the last_build file
-                        sh '''
-                            commit_info="$(git log -3 --pretty='%h by %an - %s<br>')"
-                            export build_info_file="last_build.txt"
-                            printf "Last build #${BUILD_ID}: $artifact_name from $GIT_BRANCH:\n\n$commit_info" > $build_info_file
+                        sh '''#!/usr/bin/env bash
+                            commit_info="$(git log -3 --pretty='%h by %an - %s\n')"
+                            printf "Last build #${BUILD_ID}: $artifact_name from $GIT_BRANCH:\n\n$commit_info" > last_build.txt
                         '''
 
                         // Note there must be exactly one .vsix
@@ -77,7 +68,7 @@ spec:
                         export sshHost="genie.codewind@projects-storage.eclipse.org"
                         export deployDir="/home/data/httpd/download.eclipse.org/codewind/codewind-vscode/${GIT_BRANCH}/${BUILD_ID}"
                         ssh $sshHost mkdir -p $deployDir
-                        scp *.vsix $build_info_file ${sshHost}:${deployDir}
+                        scp *.vsix last_build.txt ${sshHost}:${deployDir}
                     '''
                 }
             }
