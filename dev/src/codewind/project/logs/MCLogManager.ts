@@ -11,10 +11,10 @@
 // import * as vscode from "vscode";
 
 import Project from "../Project";
-import MCLog from "./MCLog";
+import MCLog, { LogTypes } from "./MCLog";
 import Log from "../../../Logger";
 import Requester from "../Requester";
-import SocketEvents, { ILogResponse } from "../../connection/SocketEvents";
+import SocketEvents, { ILogResponse, ILogObject } from "../../connection/SocketEvents";
 
 export default class MCLogManager {
 
@@ -22,6 +22,8 @@ export default class MCLogManager {
     public readonly initPromise: Promise<void>;
 
     private readonly managerName: string;
+
+    private isShowingAll: boolean = false;
 
     constructor(
         private readonly project: Project,
@@ -51,40 +53,51 @@ export default class MCLogManager {
         return this.managerName;
     }
 
-    public onLogsListChanged(logs: ILogResponse): void {
-        const appLogs = logs.app || [];
-        const buildLogs = logs.build || [];
-
-        appLogs.concat(buildLogs).forEach((newLogData) => {
-            // skip useless container log
-            if (newLogData.logName === "-" || newLogData.logName === "container") {
-                return;
-            }
-
-            const existingIndex = this.logs.findIndex((l) => l.logName === newLogData.logName);
-            const existed = existingIndex !== -1;
-            let openOnCreate = false;
-            if (existed) {
-                // destroy the old log and replace it with this one
-                const existingLog = this.logs.splice(existingIndex, 1)[0];
-                openOnCreate = existingLog.isOpen;
-                existingLog.destroy();
-            }
-
-            const newLog = new MCLog(this.project.name, newLogData.logName, newLogData.workspathLogPath);
-            this.logs.push(newLog);
-            if (openOnCreate) {
-                newLog.showOutput();
-            }
-        });
+    public async showAll(): Promise<void> {
+        this.isShowingAll = true;
+        this.logs.forEach((log) => log.createOutput(true));
+        // await this.toggleStreamingAll(true);
     }
 
-    /**
-     * @param enable `true` to refresh (ie, restart) all logs for this project, `false` to stop streaming all logs for this project
-     */
-    public async toggleLogStreaming(enable: boolean): Promise<void> {
-        Log.d(`${this.managerName} log streaming now ${enable}`);
-        await Requester.requestToggleLogs(this.project, enable);
+    public async hideAll(): Promise<void> {
+        this.isShowingAll = false;
+        this.logs.forEach((log) => {
+            log.disable();
+            log.destroy();
+        });
+        // await this.toggleStreamingAll(false);
+    }
+
+    public onLogsListChanged(logs: ILogResponse): void {
+        if (logs.app) {
+            logs.app.forEach((newLogData) => this.processNewLog(newLogData, LogTypes.APP));
+        }
+        if (logs.build) {
+            logs.build.forEach((newLogData) => this.processNewLog(newLogData, LogTypes.BUILD));
+        }
+    }
+
+    private processNewLog(newLogData: ILogObject, logType: LogTypes): void {
+        // skip useless container log
+        if (newLogData.logName === "-" || newLogData.logName === "container") {
+            return;
+        }
+
+        const existingIndex = this.logs.findIndex((l) => l.logName === newLogData.logName);
+        const existed = existingIndex !== -1;
+        let openOnCreate = this.isShowingAll;
+        if (existed) {
+            // destroy the old log and replace it with this one
+            const existingLog = this.logs.splice(existingIndex, 1)[0];
+            openOnCreate = openOnCreate || existingLog.isEnabled;
+            existingLog.destroy();
+        }
+
+        const newLog = new MCLog(this.project, logType, newLogData.logName, newLogData.workspathLogPath);
+        this.logs.push(newLog);
+        if (openOnCreate) {
+            newLog.createOutput(false);
+        }
     }
 
     public onNewLogs(event: SocketEvents.ILogUpdateEvent): void {
@@ -98,22 +111,18 @@ export default class MCLogManager {
         }
     }
 
-    public onReconnectOrEnable(): void {
-        // Log.d(`${this.managerName} onReconnectOrEnable`);
-        // refresh all streams
-        this.toggleLogStreaming(true);
+    public onReconnect(): void {
+        this.logs
+            .filter((log) => log.isEnabled)
+            .forEach((log) => log.createOutput(true));
     }
 
-    public onDisconnectOrDisable(disconnect: boolean): void {
+    public onDisconnectOrDisable(): void {
         // Log.d(`${this.managerName} onDisconnectOrDisable`);
-        this.logs.forEach((log) => log.onDisconnectOrDisable(disconnect));
+        this.logs.forEach((log) => log.destroy());
     }
 
     public get logs(): MCLog[] {
         return this._logs;
-    }
-
-    public destroyAllLogs(): void {
-        this.logs.forEach((log) => log.destroy());
     }
 }

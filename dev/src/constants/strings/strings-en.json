@@ -76,10 +76,7 @@
     },
 
     "logs": {
-        "waitingForLogs": "Waiting for Codewind to send logs...",
-        "noLongerUpdating": "This log is no longer updating: {{ reason }}.",
-        "notUpdatingReasonDisconnect": "Codewind disconnected",
-        "notUpdatingReasonDisabled": "the project has been disabled. The log will be recreated when there is new output"
+        "waitingForLogs": "Waiting for Codewind to send logs..."
     },
 
     "project": {
@@ -124,6 +121,7 @@
         "updatingSetting": "Updating {{ settingName }} for",
         "checkingAvailableLogs": "checking available logs",
         "togglingLogs": "toggling logs {{ onOrOff }}",
+        "togglingLog": "toggling {{ logType }} log {{ logName }} {{ onOrOff }}",
         "checkingMetrics": "checking metrics status",
 
         "requestSuccess":   "{{ projectName }}: {{ operationName }}",

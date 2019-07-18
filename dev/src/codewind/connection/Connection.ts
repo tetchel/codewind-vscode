@@ -147,10 +147,6 @@ export default class Connection implements vscode.QuickPickItem, vscode.Disposab
         //     return;
         // }
 
-        if (this.hasConnected) {
-            // things to do on reconnect, but not initial connect, go here
-            this._projects.forEach((p) => p.onConnectionReconnect());
-        }
         this.hasConnected = true;
         this._isConnected = true;
         Log.d(`${this} is now connected`);
@@ -162,6 +158,11 @@ export default class Connection implements vscode.QuickPickItem, vscode.Disposab
         }
         catch (err) {
             Log.e("Error getting projects list after connect event", err);
+        }
+        if (this.hasConnected) {
+            // things to do on reconnect, but not initial connect, go here
+            // Log.d("On reconnect the projects are " + this._projects.map((p) => p.name).join(", "));
+            this._projects.forEach((p) => p.onConnectionReconnect());
         }
 
         this.onChange();

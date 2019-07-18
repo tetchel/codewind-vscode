@@ -62,7 +62,7 @@ namespace Requester {
         };
 
         const restartMsg = Translator.t(STRING_NS, "restartIntoMode", { startMode: ProjectCapabilities.getUserFriendlyStartMode(startMode) });
-        return doProjectRequest(project, ProjectEndpoints.RESTART_ACTION, body, request.post, restartMsg);
+        return doProjectEndpointRequest(project, ProjectEndpoints.RESTART_ACTION, body, request.post, restartMsg);
     }
 
     export async function requestBuild(project: Project): Promise<void> {
@@ -70,9 +70,8 @@ namespace Requester {
             action: "build"         // non-nls
         };
 
-        // return doProjectRequest(project, url, body, request.post, "Build");
         const buildMsg = Translator.t(STRING_NS, "build");
-        await doProjectRequest(project, ProjectEndpoints.BUILD_ACTION, body, request.post, buildMsg);
+        await doProjectEndpointRequest(project, ProjectEndpoints.BUILD_ACTION, body, request.post, buildMsg);
         // await requestValidate(project, true);
     }
 
@@ -88,7 +87,7 @@ namespace Requester {
             action: newAutoBuildAction
         };
 
-        const response = await doProjectRequest(project, ProjectEndpoints.BUILD_ACTION, body, request.post, newAutoBuildUserStr);
+        const response = await doProjectEndpointRequest(project, ProjectEndpoints.BUILD_ACTION, body, request.post, newAutoBuildUserStr);
         if (MCUtil.isGoodStatusCode(response.statusCode)) {
             Log.d("Received good status from autoBuild request, new auto build is: " + newAutoBuild);
             project.setAutoBuild(newAutoBuild);
@@ -102,7 +101,7 @@ namespace Requester {
         const newEnablementStr: string = Translator.t(STRING_NS, newEnablementMsgKey);
 
         const endpoint = EndpointUtil.getEnablementAction(newEnablement);
-        await doProjectRequest(project, endpoint, {}, request.put, newEnablementStr);
+        await doProjectEndpointRequest(project, endpoint, {}, request.put, newEnablementStr);
     }
 
     // Validation appears to have been removed
@@ -110,7 +109,7 @@ namespace Requester {
     //     const [endpoint, body]: [Endpoint, IValidateRequestBody] = assembleValidateRequest(project, false);
 
     //     const userOperation = Translator.t(StringNamespaces.CMD_MISC, "validate");
-    //     await doProjectRequest(project, endpoint, body, request.post, userOperation, silent);
+    //     await doProjectEndpointRequest(project, endpoint, body, request.post, userOperation, silent);
     // }
 
     // export async function requestGenerate(project: Project): Promise<void> {
@@ -118,7 +117,7 @@ namespace Requester {
 
     //     const generateMsg = Translator.t(STRING_NS, "generateMissingFiles");
 
-    //     await doProjectRequest(project, endpoint, body, request.post, generateMsg);
+    //     await doProjectEndpointRequest(project, endpoint, body, request.post, generateMsg);
     //     // request a validate after the generate so that the validation errors go away faster
     //     await requestValidate(project, true);
     // }
@@ -147,7 +146,7 @@ namespace Requester {
 
     export async function requestUnbind(project: Project): Promise<void> {
         const msg = Translator.t(STRING_NS, "unbind");
-        await doProjectRequest(project, ProjectEndpoints.UNBIND, {}, request.post, msg, true);
+        await doProjectEndpointRequest(project, ProjectEndpoints.UNBIND, {}, request.post, msg, true);
     }
 
     export async function requestAvailableLogs(project: Project): Promise<ILogResponse> {
@@ -158,25 +157,35 @@ namespace Requester {
             };
         }
         const msg = Translator.t(STRING_NS, "checkingAvailableLogs");
-        return (await doProjectRequest(project, ProjectEndpoints.LOGS, {}, request.get, msg, true)).body;
+        return (await doProjectEndpointRequest(project, ProjectEndpoints.LOGS, {}, request.get, msg, true)).body;
     }
 
-    export async function requestToggleLogs(project: Project, enable: boolean): Promise<void> {
+    export async function requestToggleLog(project: Project, enable: boolean, logType: string, logName: string): Promise<void> {
+        const method = enable ? request.post : request.delete;
+        const onOrOff = enable ? "on" : "off";
+        const msg = Translator.t(STRING_NS, "togglingLog", { logType, logName, onOrOff });
+        const url = EndpointUtil.resolveProjectEndpoint(project.connection, project.id, ProjectEndpoints.LOGS) + `/${logType}/${logName}`;
+        await doProjectRequest(project, url, {}, method, msg, true);
+    }
+
+    export async function requestToggleAllLogs(project: Project, enable: boolean): Promise<void> {
         const method = enable ? request.post : request.delete;
         const onOrOff = enable ? "on" : "off";
         const msg = Translator.t(STRING_NS, "togglingLogs", { onOrOff });
-        await doProjectRequest(project, ProjectEndpoints.LOGS, {}, method, msg, true);
+        await doProjectEndpointRequest(project, ProjectEndpoints.LOGS, {}, method, msg, true);
     }
 
     export async function getCapabilities(project: Project): Promise<ProjectCapabilities> {
-        const capabilitiesRes = (await doProjectRequest(project, ProjectEndpoints.CAPABILITIES, {}, request.get, "Getting capabilities", true)).body;
+        const capabilitiesRes =
+            (await doProjectEndpointRequest(project, ProjectEndpoints.CAPABILITIES, {}, request.get, "Getting capabilities", true)).body;
+
         const metricsAvailable = await areMetricsAvailable(project);
         return new ProjectCapabilities(capabilitiesRes.startModes, capabilitiesRes.controlCommands, metricsAvailable);
     }
 
     async function areMetricsAvailable(project: Project): Promise<boolean> {
         const msg = Translator.t(STRING_NS, "checkingMetrics");
-        const res = await doProjectRequest(project, ProjectEndpoints.METRICS_STATUS, {}, request.get, msg, true);
+        const res = await doProjectEndpointRequest(project, ProjectEndpoints.METRICS_STATUS, {}, request.get, msg, true);
         const available = res.body.metricsAvailable;
         return available;
     }
@@ -190,7 +199,7 @@ namespace Requester {
      * @param userOperationName - If `!silent`, a message will be displayed to the user that they are doing this operation on this project.
      * @param silent - If true, an info message will not be displayed when the request is initiated. Error messages are always displayed.
      */
-    async function doProjectRequest(
+    async function doProjectEndpointRequest(
             project: Project, endpoint: Endpoint, body: {},
             requestFunc: RequestFunc, userOperationName: string, silent: boolean = false): Promise<request.FullResponse> {
 
@@ -201,6 +210,17 @@ namespace Requester {
         else {
             url = EndpointUtil.resolveMCEndpoint(project.connection, endpoint as MCEndpoints);
         }
+
+        return doProjectRequest(project, url, body, requestFunc, userOperationName, silent);
+    }
+
+    /**
+     * doProjectEndpointRequest, but with the added flexibility of providing the full URL instead of an Endpoint
+     * (for endpoints which don't follow the standard!)
+     */
+    async function doProjectRequest(
+            project: Project, url: string, body: {},
+            requestFunc: RequestFunc, userOperationName: string, silent: boolean = false): Promise<request.FullResponse> {
 
         Log.i(`Doing ${userOperationName} request to ${url}`);
 
@@ -214,10 +234,10 @@ namespace Requester {
 
         try {
             const result: request.FullResponse = await requestFunc(url, options);
-            Log.d(`Response code ${result.statusCode} from ` +
-                `${userOperationName.toLowerCase()} request for ${project.name}`);
-
             if (!silent) {
+                Log.d(`Response code ${result.statusCode} from ` +
+                    `${userOperationName.toLowerCase()} request for ${project.name}`);
+
                 vscode.window.showInformationMessage(
                     Translator.t(STRING_NS, "requestSuccess",
                     { operationName: userOperationName, projectName: project.name })

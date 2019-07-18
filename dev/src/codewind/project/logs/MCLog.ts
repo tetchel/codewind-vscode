@@ -9,8 +9,16 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 import * as vscode from "vscode";
+
 import Translator from "../../../constants/strings/translator";
 import StringNamespaces from "../../../constants/strings/StringNamespaces";
+import Requester from "../Requester";
+import Project from "../Project";
+import Log from "../../../Logger";
+
+export enum LogTypes {
+    APP = "app", BUILD = "build",
+}
 
 const STRING_NS = StringNamespaces.LOGS;
 
@@ -24,18 +32,29 @@ export default class MCLog implements vscode.QuickPickItem {
 
     private output: vscode.OutputChannel | undefined;
 
+    /**
+     * If the user has selected to show this log, either through Manage Logs or Show All Logs.
+     * Persists through disconnect.
+     */
+    private _isEnabled: boolean = false;
+    private _isStreaming: boolean = false;
+
     constructor(
-        projectName: string,
+        private readonly project: Project,
         // MUST match the logName provided in the log-update events
+        public readonly logType: LogTypes,
         public readonly logName: string,
         public readonly logPath?: string,
     ) {
-        this.displayName = `${projectName} - ${this.logName}`;
+        this.displayName = `${project.name} - ${this.logName}`;
         this.label = this.displayName;
         // this.detail = logPath;
         // this.description = `(${this.logType} log)`;
+        Log.d(`Initialized log ${this.displayName}`);
+    }
 
-        // Log.d(`Initialized log ${this.displayName} internal name ${this.logName} from ${}`);
+    public toString(): string {
+        return this.displayName;
     }
 
     public onNewLogs(reset: boolean, logs: string): void {
@@ -51,49 +70,57 @@ export default class MCLog implements vscode.QuickPickItem {
         this.output.append(logs);
     }
 
-    public get isOpen(): boolean {
-        return this.output != null;
+    public get isEnabled(): boolean {
+        return this._isEnabled;
     }
 
     // quickPickItem
     public get picked(): boolean {
-        return this.isOpen;
+        return this.isEnabled;
     }
 
-    public removeOutput(): void {
+    public createOutput(show: boolean): void {
+        // Log.d("Show log " + this.displayName);
+        if (!this.output) {
+            // Log.d("Creating output for log " + this.displayName);
+            this.output = vscode.window.createOutputChannel(this.displayName);
+            this.output.appendLine(Translator.t(STRING_NS, "waitingForLogs"));
+            if (show) {
+                this.output.show();
+            }
+        }
+        this.toggleStreaming(true);
+        this._isEnabled = true;
+    }
+
+    public disable(): void {
+        this._isEnabled = false;
+    }
+
+    public destroy(): void {
         // Log.d("Hide log " + this.displayName);
         if (this.output) {
             this.output.dispose();
             this.output = undefined;
         }
-    }
-
-    public showOutput(): void {
-        // Log.d("Show log " + this.displayName);
-        if (!this.output) {
-            // Log.d("Creating output for log " + this.displayName);
-            this.output = vscode.window.createOutputChannel(this.displayName);
-            this.output.show();
-            this.output.appendLine(Translator.t(STRING_NS, "waitingForLogs"));
+        // this is called on disconnect so skip this step if it will fail
+        if (this.project.connection.isConnected) {
+            this.toggleStreaming(false);
         }
     }
 
-    public onDisconnectOrDisable(disconnect: boolean): void {
-        if (this.output) {
-            let notUpdatingReason: string;
-            if (disconnect) {
-                notUpdatingReason = Translator.t(STRING_NS, "notUpdatingReasonDisconnect");
-            }
-            else {
-                notUpdatingReason = Translator.t(STRING_NS, "notUpdatingReasonDisabled");
-            }
-            const msg = "*".repeat(8) + Translator.t(STRING_NS, "logNoLongerUpdating", { reason: notUpdatingReason });
-
-            this.output.appendLine(msg);
+    public async toggleStreaming(enable: boolean): Promise<void> {
+        if (this._isStreaming === enable) {
+            // no-op
+            return;
         }
-    }
-
-    public destroy(): void {
-        this.removeOutput();
+        try {
+            await Requester.requestToggleLog(this.project, enable, this.logType.toString(), this.logName);
+            this._isStreaming = enable;
+        }
+        catch (err) {
+            Log.e(`Error toggling ${this} to stream ${enable}`, err);
+        }
+        // Log.d("Now streaming single log", this.displayName);
     }
 }

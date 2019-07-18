@@ -373,19 +373,18 @@ export default class Project implements vscode.QuickPickItem {
     }
 
     public onConnectionReconnect(): void {
-        this.logManager.onReconnectOrEnable();
+        this.logManager.onReconnect();
     }
 
     public onConnectionDisconnect(): void {
         if (this.pendingRestart != null) {
             this.pendingRestart.onDisconnectOrDisable(true);
         }
-        this.logManager.onDisconnectOrDisable(true);
+        this.logManager.onDisconnectOrDisable();
     }
 
     public async onEnable(): Promise<void> {
         Log.i(`${this.name} has been enabled`);
-        this.logManager.onReconnectOrEnable();
         await this.updateCapabilities();
     }
 
@@ -394,8 +393,7 @@ export default class Project implements vscode.QuickPickItem {
         if (this.pendingRestart != null) {
             this.pendingRestart.onDisconnectOrDisable(false);
         }
-        // this.logManager.destroyAllLogs();
-        this.logManager.onDisconnectOrDisable(false);
+        this.logManager.onDisconnectOrDisable();
     }
 
     public async dispose(): Promise<void> {
@@ -538,13 +536,14 @@ export default class Project implements vscode.QuickPickItem {
      */
     private setPort(newPort: OptionalString, portType: keyof IProjectPorts): boolean {
         if (newPort === "") {
+            // Number("") returns 0, not NaN :O
             newPort = undefined;
         }
         const newPortNumber = Number(newPort);
         const currentPort = this._ports[portType];
 
         if (newPort && !MCUtil.isGoodPort(newPortNumber)) {
-            Log.w(`Invalid ${portType} port ${newPort} given to project ${this.name}, ignoring it`);
+            Log.w(`Invalid ${portType} port ${JSON.stringify(newPort)} given to project ${this.name}, ignoring it`);
             return false;
         }
         else if (currentPort !== newPortNumber) {

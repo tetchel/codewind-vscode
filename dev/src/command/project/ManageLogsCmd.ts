@@ -34,21 +34,19 @@ async function manageLogsInner(project: Project, all?: "show" | "hide"): Promise
     await project.logManager.initPromise;
     const logs = project.logManager.logs;
 
-    if (logs.length === 0) {
-        vscode.window.showWarningMessage("This project does not have any logs available at this time.");
-        return;
-    }
-
     if (all === "show") {
         Log.d("Showing all logs for " + project.name);
-        project.logManager.logs.forEach((log) => log.showOutput());
-        await project.logManager.toggleLogStreaming(true);
+        await project.logManager.showAll();
         return;
     }
     else if (all === "hide") {
         Log.d("Hiding all logs for " + project.name);
-        project.logManager.logs.forEach((log) => log.removeOutput());
-        await project.logManager.toggleLogStreaming(false);
+        await project.logManager.hideAll();
+        return;
+    }
+
+    if (logs.length === 0) {
+        vscode.window.showWarningMessage("This project does not have any logs available at this time.");
         return;
     }
 
@@ -58,21 +56,18 @@ async function manageLogsInner(project: Project, all?: "show" | "hide"): Promise
     };
 
     // https://github.com/Microsoft/vscode/issues/64014
-    const logsToShow: MCLog[] | undefined = await vscode.window.showQuickPick<MCLog>(logs, options) as (MCLog[] | undefined);
+    const logsToShow = await vscode.window.showQuickPick<MCLog>(logs, options) as (MCLog[] | undefined);
     if (logsToShow != null) {
         // Log.d("selection", selection);
 
         logs.forEach((log) => {
             if (logsToShow.includes(log)) {
-                log.showOutput();
+                log.createOutput(true);
             }
             else {
-                log.removeOutput();
+                log.disable();
+                log.destroy();
             }
         });
-
-        // stop the stream if 0 logs are to be shown,
-        // or restart the stream if at least one is to be shown (in case one of the ones to be shown is a new one)
-        await project.logManager.toggleLogStreaming(logsToShow.length !== 0);
     }
 }
