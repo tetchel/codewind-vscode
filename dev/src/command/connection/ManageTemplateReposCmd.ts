@@ -22,6 +22,7 @@ import Requester from "../../codewind/project/Requester";
 import MCUtil from "../../MCUtil";
 import Commands from "../../constants/Commands";
 import { CWDocs } from "../../constants/Constants";
+import CLIWrapper from "../../codewind/connection/CLIWrapper";
 
 /**
  * Template repository/source data as provided by the backend
@@ -91,7 +92,13 @@ export default async function manageTemplateReposCmd(connection: Connection): Pr
         dark:  vscode.Uri.file(icons.dark)
     };
 
-    refreshManageReposPage(connection);
+    try {
+        refreshManageReposPage(connection);
+    }
+    catch (err) {
+        Log.e("Error creating Manage Repos page", err);
+        vscode.window.showErrorMessage(MCUtil.errToString(err));
+    }
     manageReposPage.webview.onDidReceiveMessage(handleWebviewMessage.bind(connection));
 }
 
@@ -99,7 +106,7 @@ export async function refreshManageReposPage(connection: Connection): Promise<vo
     if (!manageReposPage) {
         return;
     }
-    const html = generateManageReposHtml(await Requester.getTemplateSources(connection));
+    const html = generateManageReposHtml(await CLIWrapper.listTemplateSources(connection));
 
     // For debugging in the browser, write out the html to an html file on disk and point to the resources on disk
     // if (process.env[Constants.CW_ENV_VAR] === Constants.CW_ENV_DEV) {
@@ -138,7 +145,7 @@ async function handleWebviewMessage(this: Connection, msg: WebviewUtil.IWVMessag
                 }
 
                 try {
-                    await Requester.addTemplateRepo(connection, repoInfo.repoUrl, repoInfo.repoName, repoInfo.repoDescr);
+                    await CLIWrapper.addTemplateSource(connection, repoInfo.repoUrl, repoInfo.repoName, repoInfo.repoDescr);
                     await refreshManageReposPage(connection);
                 }
                 catch (err) {
@@ -164,7 +171,7 @@ async function handleWebviewMessage(this: Connection, msg: WebviewUtil.IWVMessag
                 }
 
                 try {
-                    await Requester.removeTemplateRepo(connection, repoUrl);
+                    await CLIWrapper.removeTemplateSource(connection, repoUrl);
                     await refreshManageReposPage(connection);
                 }
                 catch (err) {

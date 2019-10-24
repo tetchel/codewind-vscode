@@ -292,7 +292,6 @@ export namespace CLILifecycleWrapper {
                 }
                 Log.e("Install failed", err);
                 LocalCodewindManager.instance.changeState(CodewindStates.ERR_INSTALLING);
-                vscode.window.showErrorMessage(MCUtil.errToString(err));
                 return onInstallFailOrReject(false);
             }
         }

@@ -13,7 +13,7 @@ export class CLICommand {
     constructor(
         public readonly command: string[],
         public readonly cancellable: boolean,
-        public readonly hasJSONOutput: boolean
+        public readonly hasJSONOutput: boolean,
     ) {
 
     }
@@ -23,7 +23,8 @@ export class CLICommand {
 export const CLICommands = {
     CREATE: new CLICommand([ "project", "create" ], false, true),
     SYNC: new CLICommand([ "project", "sync" ], false, false),
-    BIND: new CLICommand([ "project", "bind" ], false, true)
+    BIND: new CLICommand([ "project", "bind" ], false, true),
+    REPO_ADD: new CLICommand( [ "templates", "repos", "add" ], false, true),
+    REPO_REMOVE: new CLICommand( [ "templates", "repos", "rm" ], false, true),
+    REPO_LIST: new CLICommand( [ "templates", "repos", "ls" ], false, true),
 };
-
-export const ARG_PROJECT_CREATE = "create";

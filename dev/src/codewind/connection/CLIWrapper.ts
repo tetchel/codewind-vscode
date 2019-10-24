@@ -24,6 +24,8 @@ import Commands from "../../constants/Commands";
 import { CLICommand, CLICommands } from "./CLICommands";
 import { CLILifecycleCommands, CLILifecycleCommand } from "./local/CLILifecycleCommands";
 import Project from "../project/Project";
+import Connection from "./Connection";
+import { ITemplateRepo } from "../../command/connection/ManageTemplateReposCmd";
 
 const BIN_DIR = "bin";
 const CLI_EXECUTABLE = "cwctl";
@@ -68,6 +70,47 @@ namespace CLIWrapper {
     }
     */
 
+    function nullCheckSourcesOutput(sources: any[]): ITemplateRepo[] {
+        // fill in missing fields to work around https://github.com/eclipse/codewind/issues/847
+        return sources.map((source) => {
+            if (source.projectStyles == null) {
+                source.projectStyles = [];
+            }
+            if (source.enabled == null) {
+                source.enabled = true;
+            }
+            if (source.protected == null) {
+                source.protected = false;
+            }
+            return source;
+        });
+    }
+
+    export async function listTemplateSources(_connection: Connection): Promise<ITemplateRepo[]> {
+        return nullCheckSourcesOutput(await cliExec(CLICommands.REPO_LIST));
+    }
+
+    export async function addTemplateSource(
+        _connection: Connection, repoUrl: string, repoName: string, repoDescr?: string): Promise<ITemplateRepo[]> {
+
+        const args = [
+            "--URL", repoUrl,
+            "--name", repoName,
+        ];
+
+        if (repoDescr) {
+            args.push("--description", repoDescr);
+        }
+
+        return nullCheckSourcesOutput(await cliExec(CLICommands.REPO_ADD, args));
+    }
+
+    export async function removeTemplateSource(_connection: Connection, repoUrl: string): Promise<ITemplateRepo[]> {
+        const args = [
+            "--URL", repoUrl
+        ];
+        return nullCheckSourcesOutput(await cliExec(CLICommands.REPO_REMOVE, args));
+    }
 
     // check error against this to see if it's a real error or just a user cancellation
     export const CLI_CMD_CANCELLED = "Cancelled";
@@ -117,12 +160,13 @@ namespace CLIWrapper {
         return initialize();
     }
 
-    export async function cliExec(cmd: CLICommand, args: string[], progressPrefix?: string): Promise<any> {
+    export async function cliExec(cmd: CLICommand, args: string[] = [], progressPrefix?: string): Promise<any> {
         const executablePath = await initialize();
 
-        args = cmd.command.concat(args);
+        const fullCmd = cmd.command.concat(args);
+        const fullCmdStr = fullCmd.join(" ");
 
-        Log.i(`Running CLI command: ${args.join(" ")}`);
+        Log.i(`Running CLI command: ${fullCmdStr}`);
 
         const executableDir = path.dirname(executablePath);
 
@@ -132,7 +176,7 @@ namespace CLIWrapper {
             title: progressPrefix,
         }, (progress, token) => {
             return new Promise<any>((resolve, reject) => {
-                const child = child_process.spawn(executablePath, args, {
+                const child = child_process.spawn(executablePath, fullCmd, {
                     cwd: executableDir
                 });
 
@@ -161,12 +205,13 @@ namespace CLIWrapper {
                         Log.d(`CLI command ${cmd.command} did not exit normally, likely was cancelled`);
                     }
                     else if (code !== 0) {
-                        Log.e(`Error running CLI command ${cmd.command}`, errStr);
+                        Log.e(`Error running CLI command ${fullCmdStr}`, errStr);
                         outStr = outStr || "No output";
-                        errStr = errStr || `Unknown error running command ${cmd.command}`;
+                        errStr = errStr || `Unknown error`;
                         writeOutError(cmd, outStr, errStr);
                         Log.e("Stdout:", outStr);
                         Log.e("Stderr:", errStr);
+                        vscode.window.showErrorMessage(`Error running cwctl command ${fullCmdStr}: ${MCUtil.errToString(errStr)}`);
                         reject(errStr);
                     }
                     else {
