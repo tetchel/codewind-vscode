@@ -33,4 +33,5 @@ export const CWConfigurations = {
     AUTO_SHOW_VIEW:             new CWConfiguration("autoShowView", true),
     OVERVIEW_ON_CREATION:       new CWConfiguration("openOverviewOnCreation", true),
     ALWAYS_CREATE_IN_WORKSPACE: new CWConfiguration("alwaysCreateProjectsInWorkspace", false),
+    STOP_CONTAINERS_ON_EXIT:    new CWConfiguration("stopContainersOnExit", false),
 } as const;

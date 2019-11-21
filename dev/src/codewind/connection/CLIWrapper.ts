@@ -166,7 +166,7 @@ namespace CLIWrapper {
                             Log.e("Stderr:", errStr.trim());
                         }
 
-                        let errMsg = `Error running ${path.basename(_executablePath)} ${cmd.command.join(" ")}`;
+                        let errMsg = `Error running ${path.basename(_executablePath)} ${cmd}`;
                         if (cmd.hasJSONOutput && isProbablyJSON(outStr)) {
                             const asObj = JSON.parse(outStr);
                             if (asObj.error_description) {

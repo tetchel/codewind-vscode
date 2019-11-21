@@ -21,6 +21,7 @@ import StringNamespaces from "./constants/strings/StringNamespaces";
 import connectLocalCodewindCmd from "./command/StartCodewindCmd";
 import Constants from "./constants/Constants";
 import ConnectionManager from "./codewind/connection/ConnectionManager";
+import LocalCodewindManager from "./codewind/connection/local/LocalCodewindManager";
 
 // configures json as the language of the codewind settings file.
 function setSettingsFileLanguage(doc: vscode.TextDocument): void {
@@ -37,6 +38,8 @@ function setSettingsFileLanguage(doc: vscode.TextDocument): void {
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 
     process.on("unhandledRejection", (err) => Log.e("Unhandled promise rejection:", err));
+    process.on("beforeExit", (event) => Log.i("Before exit!", event));
+    process.on("exit", (event) => Log.i("Exiting!", event));
 
     // Initialize our globals
     global.__extRoot = context.extensionPath;
@@ -67,9 +70,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         ...createViews(),
         ...createCommands(),
         // ...createDebug()
+        ConnectionManager.instance,
+        LocalCodewindManager.instance,
     ];
-
-    subscriptions.push(ConnectionManager.instance);
 
     // configure json as the language of the codewind settings file.  ensure that this is applied
     // to any settings file active in the editor at the time this extension activates.
@@ -80,18 +83,18 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         }
     });
 
+    subscriptions.forEach((disposable) => {
+        context.subscriptions.push(disposable);
+    });
+
     await ConnectionManager.instance.activate();
     // Connect to local codewind if it's started, but don't start it automatically.
     connectLocalCodewindCmd(false);
-
-    subscriptions.forEach((e) => {
-        context.subscriptions.push(e);
-    });
-
     Log.d("Finished activating");
 }
 
 // this method is called when your extension is deactivated
-export function deactivate(): void {
-    // nothing here
+export async function deactivate(): Promise<void> {
+    Log.i(`Deactivate Codewind extension`);
+    // await LocalCodewindManager.instance.dispose();
 }

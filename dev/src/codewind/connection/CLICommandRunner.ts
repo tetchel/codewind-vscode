@@ -67,6 +67,10 @@ export class CLICommand {
             }
         }
     }
+
+    public toString(): string {
+        return this.command.join(" ");
+    }
 }
 
 const STATUS = new CLICommand([ "status" ]);

@@ -23,6 +23,7 @@ import Resources from "../../../constants/Resources";
 import Commands from "../../../constants/Commands";
 import Requester from "../../project/Requester";
 import CWDocs from "../../../constants/CWDocs";
+import { CWConfigurations } from "../../../constants/Configurations";
 
 const CHE_CW_URL = "https://localhost:9090";
 
@@ -30,7 +31,7 @@ const CHE_CW_URL = "https://localhost:9090";
  * This singleton class wraps the local Codewind connection, which exists if CW is running locally,
  * and controls the local Codewind containers' lifecycle.
  */
-export default class LocalCodewindManager {
+export default class LocalCodewindManager implements vscode.Disposable {
 
     private static _instance: LocalCodewindManager;
 
@@ -54,6 +55,14 @@ export default class LocalCodewindManager {
 
     public get state(): CodewindStates {
         return this._state;
+    }
+
+    public async dispose(): Promise<void> {
+        if (CWConfigurations.STOP_CONTAINERS_ON_EXIT.get()) {
+            Log.d(`Stopping Codewind on LocalCodewindManager dispose`);
+            await this.stopCodewind();
+        }
+        Log.d("Finished disposing LocalCodewindManager");
     }
 
     ///// Start/Stop Codewind /////
@@ -114,7 +123,11 @@ export default class LocalCodewindManager {
 
     public async stopCodewind(): Promise<void> {
         await CLILifecycleWrapper.stop();
+        if (this._localConnection) {
+            await this._localConnection.dispose();
+        }
         this._localConnection = undefined;
+        Log.d("Finished stopCodewind");
     }
 
     /**

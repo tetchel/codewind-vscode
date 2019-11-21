@@ -128,7 +128,8 @@ export default class Connection implements vscode.QuickPickItem, vscode.Disposab
     }
 
     public async dispose(): Promise<void> {
-        return this.disable();
+        await this.disable();
+        Log.d(`Finished disposing ${this}`);
     }
 
     public toString(): string {
@@ -192,7 +193,7 @@ export default class Connection implements vscode.QuickPickItem, vscode.Disposab
     }
 
     public onConnect = async (): Promise<void> => {
-        Log.d(`${this} onConnect`);
+        // Log.d(`${this} onConnect`);
         if (this.isConnected) {
             // we already know we're connected, nothing to do until we disconnect
             return;
@@ -217,7 +218,7 @@ export default class Connection implements vscode.QuickPickItem, vscode.Disposab
     }
 
     public onDisconnect = async (): Promise<void> => {
-        Log.d(`${this} onDisconnect`);
+        // Log.d(`${this} onDisconnect`);
         if (this._state === ConnectionStates.NETWORK_ERROR) {
             // we already know we're disconnected, nothing to do until we reconnect
             return;

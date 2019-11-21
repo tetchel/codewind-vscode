@@ -48,8 +48,10 @@ export default class ConnectionManager implements vscode.Disposable {
     }
 
     public async dispose(): Promise<void> {
+        Log.d("Dispose ConnectionManager");
         await Promise.all([
-            this.connections.map((conn) => conn.dispose()),
+            // the local connection is disposed by the LocalCodewindManager
+            this.remoteConnections.map((conn) => conn.dispose()),
         ]);
     }
 
