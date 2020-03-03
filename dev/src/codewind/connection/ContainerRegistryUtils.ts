@@ -59,15 +59,15 @@ namespace RegistryUtils {
 
     const newRegistryWizardSteps: InputUtil.InputStep[] = [
         {
-            promptGenerator: () => `Enter the registry's base address (domain). Do not specify a namespace.`,
+            prompt: () => `Enter the registry's base address (domain). Do not specify a namespace.`,
             placeholder: `docker.io`,
             // validator: RegistryUtils.validateAddress,
         },
         {
-            promptGenerator: (address) => `Enter the username for ${address}.`,
+            prompt: (address) => `Enter the username for ${address}.`,
         },
         {
-            promptGenerator: (address, username) => `Enter the password or an API key for ${username} @ ${address}.`,
+            prompt: (address, username) => `Enter the password or an API key for ${username} @ ${address}.`,
             password: true,
             allowEmpty: true,
         },
@@ -158,28 +158,29 @@ namespace RegistryUtils {
     }
 
     async function promptSetAsPushRegistry(address: string): Promise<boolean | undefined> {
-        const setAsPushOption: vscode.QuickPickItem = {
-            label: `Set ${address} as your image push registry`,
-            detail: `Codewind-style project images will be pushed to this registry.`
-        };
-        const dontSetAsPushOption: vscode.QuickPickItem = {
-            label: `Don't set ${address} as image push registry`,
-            detail: `This registry can still be used to pull private images.`
+        const setAsPushLabel = `Set ${address} as your image push registry`;
+
+        const step: InputUtil.QuickPickStep = {
+            placeholder: `Would you like to push your built Codewind project images to this registry?`,
+            items: [
+                {
+                    label: setAsPushLabel,
+                    detail: `Codewind-style project images will be pushed to this registry.`
+                },
+                {
+                    label: `Don't set ${address} as image push registry`,
+                    detail: `This registry can still be used to pull private images.`
+                },
+            ]
         };
 
-        const response = await vscode.window.showQuickPick([
-            setAsPushOption, dontSetAsPushOption,
-        ], {
-            canPickMany: false,
-            ignoreFocusOut: true,
-            placeHolder: `Would you like to push your built Codewind project images to this registry?`
-        });
+        const response = await InputUtil.runMultiStepInput("Set as Image Push Registry", [ step ]);
 
         if (response == null) {
             return undefined;
         }
 
-        return response === setAsPushOption;
+        return response[0] === setAsPushLabel;
     }
 
     async function promptForNamespace(registryAddress: string, registryUsername: string): Promise<string | undefined> {
