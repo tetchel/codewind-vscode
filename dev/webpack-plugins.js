@@ -60,8 +60,8 @@ class FailOnCriticalDependencyPlugin {
      * @returns {void}
      */
     apply(compiler) {
-        compiler.hooks.afterCompile.tap(this.pluginName, async (_compiler) => {
-            console.log(`Scanning for critical dependency warnings...`);
+        compiler.hooks.afterCompile.tap(this.pluginName, async (compiler) => {
+            console.log(`Scanning ${compiler.outputOptions.filename} for critical dependency warnings...`);
         });
 
         compiler.hooks.shouldEmit.tap(this.pluginName, (compilation) => {

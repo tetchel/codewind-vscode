@@ -18,7 +18,7 @@
             "outFiles": [
                 "${workspaceFolder}/out/**/*.js"
             ],
-            "preLaunchTask": "ts-watch",
+            // "preLaunchTask": "ts-watch-all",
             "env": {
                 "CW_ENV": "dev",
                 // To debug weviews in the browser, set WEBVIEW_DEBUG_DIR to an output directory. See WebviewUtil.debugWriteOutWebview
@@ -32,7 +32,7 @@
             "runtimeExecutable": "${execPath}",
             "args": [
                 "--extensionDevelopmentPath=${workspaceFolder}",
-                "--extensionTestsPath=${workspaceFolder}/out/test/Index.js",
+                "--extensionTestsPath=${workspaceFolder}/",
                 // Set your tests' workspace path here. It can be any existing directory.
                 "/Users/tim/codewind-vscode-testworkspace",
             ],
@@ -42,7 +42,7 @@
             "env": {
                 "CW_ENV": "test",
             },
-            "preLaunchTask": "ts-watch"
+            "preLaunchTask": "ts-watch-all"
         }
     ]
 }

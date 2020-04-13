@@ -4,16 +4,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "delete-dist",
-            "type": "shell",
-            "command": "rm",
-            "args": [
-                "-rf",
-                "dist/"
-            ]
-        },
-        {
-            "label": "ts-watch",
+            "label": "ts-watch-extension",
             "type": "typescript",
             "tsconfig": "tsconfig.json",
             "option": "watch",
@@ -30,11 +21,47 @@
             },
             "group": {
                 "kind": "build",
-                "isDefault": true,
+                "isDefault": true
             },
             "runOptions": {
                 "instanceLimit": 1
             }
+        },
+        {
+            "label": "ts-watch-webview",
+            "type": "typescript",
+            "tsconfig": "tsconfig.webview.json",
+            "option": "watch",
+            "problemMatcher": [
+                "$tsc-watch"
+            ],
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "dedicated",
+                "showReuseMessage": true,
+                "clear": true
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "runOptions": {
+                "instanceLimit": 1
+            }
+        },
+        {
+            "label": "ts-watch-all",
+            "dependsOn": [
+                "ts-watch-extension",
+                "ts-watch-webview"
+            ],
+            "group": "build",
+            "isBackground": true,
+            "problemMatcher": [
+                "$tsc-watch"
+            ]
         },
         {
             "type": "npm",
@@ -44,8 +71,7 @@
             "presentation": {
                 "reveal": "always",
                 "panel": "dedicated",
-                "clear": true,
-                "revealProblems": "onProblem"
+                "clear": true
             },
             "runOptions": {
                 "instanceLimit": 1
@@ -95,6 +121,20 @@
             "problemMatcher": [
                 "$tslint5"
             ]
+        },
+        {
+            "label": "clean",
+            "type": "shell",
+            "command": "rm -rf out/ dist/ *.tsbuildinfo",
+            "problemMatcher": [],
+            "presentation": {
+                "echo": true,
+                "reveal": "never",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": true
+            }
         }
     ]
 }

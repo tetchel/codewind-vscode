@@ -150,6 +150,9 @@ async function prebuildVSCode(pj) {
     return pj;
 }
 
+const BUNDLE_DIR = "dist";
+const BUNDLE_ENTRYPOINT = path.join(".", BUNDLE_DIR, "Extension.js");
+
 /**
  *
  * @param {object} pj
@@ -164,10 +167,9 @@ async function preparePackageJSON(pj, isForChe) {
         newPJ = await prebuildVSCode(newPJ);
     }
 
-    const prodEntrypoint = "./dist/extension.js";
     // replace dev entrypoint with production one
-    console.log(`Changing extension entrypoint from ${newPJ.main} to ${prodEntrypoint}`);
-    newPJ.main = prodEntrypoint;
+    console.log(`Changing extension entrypoint from ${newPJ.main} to ${BUNDLE_ENTRYPOINT}`);
+    newPJ.main = BUNDLE_ENTRYPOINT;
 
     await writePackageJSON(newPJ);
 }

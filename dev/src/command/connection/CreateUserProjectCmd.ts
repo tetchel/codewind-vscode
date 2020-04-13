@@ -370,7 +370,7 @@ const ILLEGAL_CHARS = [
 ];
 
 function validateProjectName(projectName: string): string | undefined {
-    const firstIllegalChar = [...projectName].find((c) => ILLEGAL_CHARS.includes(c));
+    const firstIllegalChar = Array.from(projectName).find((c) => ILLEGAL_CHARS.includes(c));
 
     if (firstIllegalChar != null) {
         return `Invalid project name "${projectName}". Project names may not contain "${firstIllegalChar}"`;

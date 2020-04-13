@@ -1,0 +1,26 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "composite": false,
+        "declaration": false,
+        "declarationMap": false,
+        "target": "es6",
+        "moduleResolution": "node",
+        "module": "esnext",
+        "importHelpers": true,
+        "allowUmdGlobalAccess": true,
+        "lib": [ "DOM", "es6" ],
+        // "typeRoots": [ "node_modules/@types" ],
+        "jsx": "react"
+    },
+    "include": [
+        "src/webview/",
+    ],
+    // override the extended config's exclude
+    "exclude": [
+
+    ],
+    "references": [
+        // { "path": "tsconfig.json" }
+    ]
+}

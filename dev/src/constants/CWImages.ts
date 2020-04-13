@@ -17,7 +17,6 @@ import CWExtensionContext from "../CWExtensionContext";
 
 // non-nls-file
 
-export const RES_FOLDER_NAME = "res";
 const IMG_FOLDER_NAME = "img";
 const LIGHT_FOLDER_NAME = "light";
 const DARK_FOLDER_NAME = "dark";

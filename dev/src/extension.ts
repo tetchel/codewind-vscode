@@ -30,6 +30,7 @@ import MCUtil from "./MCUtil";
 import CLIWrapper from "./codewind/cli/CLIWrapper";
 import { CodewindStates } from "./codewind/connection/local/CodewindStates";
 import CWExtensionContext from "./CWExtensionContext";
+import ReactWebview from "./command/webview/ReactWebview";
 import Constants from "./constants/Constants";
 
 // this method is called when your extension is activated
@@ -113,6 +114,11 @@ async function activateInner(context: vscode.ExtensionContext): Promise<void> {
     });
 
     deletePendingDirs();
+
+    setTimeout(() => {
+        const rwv = new ReactWebview("🦆");
+        rwv.reveal();
+    }, 1000);
 
     Log.d("Finished activating");
 }

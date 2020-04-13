@@ -1,0 +1,19 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "composite": false,
+        "declaration": false,
+        "declarationMap": false
+    },
+    "include": [
+        "out/",
+        "src/test/"
+    ],
+    // override the extended config's exclude
+    "exclude": [
+
+    ],
+    "references": [
+        { "path": "tsconfig.json" }
+    ]
+}
