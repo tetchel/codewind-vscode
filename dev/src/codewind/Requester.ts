@@ -188,8 +188,6 @@ export class Requester {
             }
         });
 
-        const pipelinePromise = pipeline(httpStream, fs.createWriteStream(destFile));
-
         let previousPercentDone = 0;
         let didLogLength = false;
         let didLogHalfDone = false;
@@ -221,7 +219,17 @@ export class Requester {
             previousPercentDone = progressEvent.percent;
         });
 
-        await pipelinePromise;
+        const outFileStream = fs.createWriteStream(destFile);
+        outFileStream.on("close", () => { Log.d(`Closed writestream to ${destFile}`) });
+
+        try {
+            await pipeline(httpStream, outFileStream);
+        }
+        catch (err) {
+            httpStream.end();
+            outFileStream.close();
+            throw err;
+        }
 
         if (options.destFileMode) {
             await fs.chmod(destFile, options.destFileMode);

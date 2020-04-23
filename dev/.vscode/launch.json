@@ -13,7 +13,7 @@
             "args": [
                 "--extensionDevelopmentPath=${workspaceFolder}",
                 // put a workspace (.code-workspace, or folder) path below this comment to launch into a non-empty workspace
-                "/Users/tim/vscode-codewind-workspace"
+                // "/Users/tim/vscode-codewind-workspace"
             ],
             "outFiles": [
                 "${workspaceFolder}/out/**/*.js"

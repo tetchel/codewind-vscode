@@ -527,10 +527,10 @@ export default class Project implements vscode.QuickPickItem {
     }
 
     public async onLoadRunnerUpdate(event: SocketEvents.LoadRunnerStatusEvent): Promise<void> {
-        Log.d(`${this.name} load runner status changed to "${event.status}" at ${event.timestamp}`);
         if (![ "hcdReady", "profilingReady"].includes(event.status)) {
             return;
         }
+        Log.d(`${this.name} load runner status changed to "${event.status}" at ${event.timestamp}`);
         Log.d("Profiling data is ready to be saved to workspace");
 
         const timestampPath = path.join(this.localPath.fsPath, "load-test", event.timestamp);
