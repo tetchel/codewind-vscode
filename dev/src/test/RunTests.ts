@@ -22,16 +22,18 @@ import * as fs from "fs-extra";
 
 async function main(): Promise<number> {
     // The folder containing the Extension Manifest package.json
+    const extensionRoot = path.join(__dirname, "..", "..");
+
     // Passed to `--extensionDevelopmentPath`
-    const extensionDevelopmentPath = path.resolve(__dirname, '../../');
+    const extensionDevelopmentPath = extensionRoot;
 
     // The path to the extension test script
     // Passed to --extensionTestsPath
-    const extensionTestsPath = path.resolve(__dirname, './Index.js');
+    const extensionTestsPath = path.join(extensionRoot, "dist", 'Extension.tests.js');
 
     const workspaceEnv = process.env.CODE_TESTS_WORKSPACE;
 
-    let workspaceDir;
+    let workspaceDir: string;
     if (workspaceEnv) {
         workspaceDir = workspaceEnv;
     }
@@ -103,5 +105,5 @@ main()
 })
 .catch((err) => {
     console.error("Failed to run tests", err);
-    process.exit(2);
+    process.exit(1);
 });

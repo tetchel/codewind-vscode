@@ -115,10 +115,13 @@ async function activateInner(context: vscode.ExtensionContext): Promise<void> {
 
     deletePendingDirs();
 
-    setTimeout(() => {
-        const rwv = new ReactWebview("🦆");
+    const wv = () => {
+        const rwv = new ReactWebview(`🦆 ${Date.now().toString().substring(10)}`);
         rwv.reveal();
-    }, 1000);
+    }
+
+    subscriptions.push(vscode.commands.registerCommand("ext.cw.hello-react", wv));
+    setTimeout(wv, 1000);
 
     Log.d("Finished activating");
 }

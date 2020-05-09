@@ -6,11 +6,13 @@
         "lib": [ "es6" ],
         "rootDir": "src",
         "outDir": "out",
+        "baseUrl": "node_modules",
 
         "composite": true,
         "sourceMap": true,
         "declaration": true,
         "declarationMap": true,
+        "importHelpers": true,
         "noEmitOnError": true,
         "incremental": true,
         "removeComments": true,
@@ -24,12 +26,23 @@
         "forceConsistentCasingInFileNames": true,
         "esModuleInterop": true,
         "downlevelIteration": true,
+
+        "typeRoots": [
+            "node_modules/@types/",
+            "src/webview"
+        ],
+        "types": [
+        ]
     },
     "include": [
-        "src/"
+        "src",
     ],
     "exclude": [
+        "node_modules",
         "src/webview",
-        "src/test/"
+        // "src/test/"
     ],
+    "references": [
+        { "path": "tsconfig.webview.json" }
+    ]
 }

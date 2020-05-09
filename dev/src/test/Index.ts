@@ -11,6 +11,8 @@
 
 // Adapted from https://github.com/microsoft/vscode-extension-samples/blob/master/helloworld-test-sample/src/test/suite/index.ts
 
+/// <reference types="webpack-env" />
+
 import Mocha from "mocha";
 import * as path from "path";
 import * as fs from "fs-extra";
@@ -58,6 +60,13 @@ export async function run(): Promise<void> {
     suites.forEach((suite) => mocha.addFile(suite));
 
     Log.t(`Running test files: ${mocha.files.map((f) => path.basename(f)).join(", ")}`);
+
+    // This gets webpack to load the, which in turn loads all imported tests.
+    // https://webpack.js.org/guides/dependency-management/#requirecontext
+    /*
+    const rqContext = require.context("./suites", true, /\.suite\.(t|j)s$/);
+    rqContext.keys().forEach(rqContext);
+    */
 
     return new Promise<void>((resolve, reject) => {
         try {

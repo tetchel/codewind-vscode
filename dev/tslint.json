@@ -16,10 +16,9 @@
 			"allow-trailing-underscore",
 			"allow-pascal-case"
 		],
-		"await-promise": [ true,
-			"Thenable",
-			"RequestPromise",
-			"requestPromise.RequestPromise"
+		"await-promise": [
+			true,
+			"Thenable"
 		],
 		"ban": [ true,
 			[ "For test use only", "Log",  "t" ]

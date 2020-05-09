@@ -8,6 +8,7 @@ package.json.backup
 
 .awcache/
 *.tsbuildinfo
+.awcache/
 
 .DS_Store
 .nyc_output

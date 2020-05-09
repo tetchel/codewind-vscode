@@ -89,10 +89,14 @@ namespace WebviewUtil {
         if (CWExtensionContext.get().isTheia || MCUtil.isDevEnv()) {
             return "";
         }
+
         return `
         <meta http-equiv="Content-Security-Policy"
-            content="default-src 'none'; img-src vscode-resource: https:; script-src vscode-resource: 'unsafe-inline';
-            style-src vscode-resource: 'unsafe-inline'; style-src-elem: vscode-resource: https:;"
+            content="default-src 'none';
+            img-src vscode-resource: https:;
+            script-src vscode-resource: 'unsafe-inline';
+            style-src vscode-resource: https: 'unsafe-inline' data:;
+            style-src-elem: vscode-resource: https: 'unsafe-inline' data:;"
         >`;
     }
 

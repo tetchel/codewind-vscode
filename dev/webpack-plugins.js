@@ -29,16 +29,28 @@ class VSCodeTaskHelperPlugin {
      * @returns {void}
      */
     apply(compiler) {
-        // compiler.hooks.beforeCompile.tap(this.pluginName, (compiler) => {
-        //     console.log("### Starting compilation...");
-        // });
+        let startTime;
+        compiler.hooks.beforeCompile.tap(this.pluginName, (_compiler) => {
+            startTime = Date.now();
+            console.log("### Starting compilation...");
+        });
 
         compiler.hooks.done.tap(this.pluginName, (stats) => {
+            let secsElapsed;
+            if (startTime) {
+                secsElapsed = ((Date.now() - startTime) / 1000).toFixed(2) + "s";
+                startTime = undefined;
+            }
+
             const statsToStr = stats.toString;
 
             stats.toString = function (options) {
-                const statsString = statsToStr.call(this, options);
-                return `${statsString}\n\n### Webpack finished compiling!`;
+                let statsString = statsToStr.call(this, options);
+                statsString += `\n\n### Webpack finished compiling` ;
+                if (secsElapsed) {
+                    statsString += ` after ${secsElapsed}`;
+                }
+                return statsString;
             };
         });
     }
