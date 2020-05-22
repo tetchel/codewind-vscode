@@ -1,4 +1,6 @@
 {
+    // Note that this file is extended into src/webview/tsconfig.json, see the note there.
+
     "extends": "./tsconfig.json",
     "compilerOptions": {
         "target": "es5",
@@ -6,22 +8,26 @@
         "allowUmdGlobalAccess": true,
         "isolatedModules": true,
         "lib": [ "DOM", "es6" ],
-        // "typeRoots": [ "node_modules/@types" ],
         "jsx": "react",
-        "types": [
-            "react-dom",
-            "react",
-            "react/global",
-        ]
+
+        "outDir": "out-webview",
+        "declarationDir": "out-webview",
+
+        "baseUrl": ".",
+        // This allows us to import types from the Codewind codebase.
+        // If you encounter issues with this, run tsc with --traceResolution.
+        // https://www.typescriptlang.org/docs/handbook/module-resolution.html
+        // https://stackoverflow.com/a/40326719
+        "paths": {
+            "codewind/*": [ "out/@types/codewind/*" ]
+        },
     },
     "include": [
-        "src/webview",
+        "src/webview"
     ],
     // override the extended config's exclude
     "exclude": [
-
+        // "out/@types/test/"
     ],
-    "references": [
-        // { "path": "tsconfig.json" }
-    ]
+    "references": []
 }

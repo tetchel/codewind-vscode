@@ -14,8 +14,6 @@ import React from "react";
 import "../scss/app.scss";
 // import { Button } from "carbon-components-react";
 
-import type CWWebview from "../CWWebview";
-
 export default class TestPage123 extends React.Component<{}, { thingo: string }> {
 
     private clicks = 0;
@@ -27,7 +25,7 @@ export default class TestPage123 extends React.Component<{}, { thingo: string }>
         this.handleBtnClick = this.handleBtnClick.bind(this);
 
         this.state = {
-            thingo: "Nothing!!",
+            thingo: "nada!!"
         };
     }
 
@@ -40,9 +38,11 @@ export default class TestPage123 extends React.Component<{}, { thingo: string }>
     }
 
     private handleWindowEvent(e: MessageEvent): void {
-        console.log("Oh man, the test page is totally receiving a message", JSON.stringify(e.data));
-        const testMsg = e.data as CWWebview.TestMsg;
-        this.setState({ thingo: testMsg.thingo });
+        // const testMsg = e.data as CWWebview.TestMsg;
+        const testMsg = e.data;
+        if (testMsg.thingo) {
+            this.setState({ thingo: testMsg.thingo });
+        }
     }
 
     private readonly handleBtnClick = (_e: React.MouseEvent<HTMLElement>): void => {
@@ -54,7 +54,7 @@ export default class TestPage123 extends React.Component<{}, { thingo: string }>
         return (
             <div>
                 <h1>It's the test page! {this.state.thingo}</h1>
-                <button onClick={this.handleBtnClick}>Click me (or else)</button>
+                {/* <Button onClick={this.handleBtnClick}>Click me</Button> */}
             </div>
         );
     }

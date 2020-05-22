@@ -1,0 +1,5 @@
+{
+    // VS Code only picks up 'tsconfig.json' so I have this dummy file.
+    // See https://github.com/microsoft/vscode/issues/12463 specifically https://github.com/microsoft/vscode/issues/12463#issuecomment-466771273
+    "extends": "../../tsconfig.webview.json"
+}

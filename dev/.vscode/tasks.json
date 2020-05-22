@@ -12,7 +12,6 @@
                 "$tsc-watch"
             ],
             "presentation": {
-                // "revealProblems": "onProblem",
                 "reveal": "always",
                 "echo": true,
                 "panel": "dedicated",
@@ -25,6 +24,25 @@
             "runOptions": {
                 "instanceLimit": 1,
                 "runOn": "folderOpen"
+            }
+        },
+        {
+            "label": "ts-watch-webviews",
+            "type": "typescript",
+            "tsconfig": "tsconfig.webview.json",
+            "option": "watch",
+            "problemMatcher": [
+                "$tsc-watch"
+            ],
+            "presentation": {
+                "reveal": "always",
+                "echo": true,
+                "panel": "dedicated",
+                "clear": true
+            },
+            "group": "build",
+            "runOptions": {
+                "instanceLimit": 1,
             }
         },
         {
@@ -36,7 +54,6 @@
                 "isDefault": true
             },
             "presentation": {
-                // "revealProblems": "onProblem",
                 "reveal": "always",
                 "echo": true,
                 "panel": "dedicated",
@@ -46,44 +63,12 @@
                 "instanceLimit": 1,
                 "runOn": "folderOpen"
             },
-            "problemMatcher": [
-                {
-                    "fileLocation": "relative",
-                    "pattern": [
-                        {
-                            "regexp": "\\[at-loader\\] ([^:]*):(\\d+):(\\d+)\n(.*)",
-                            "file": 1,
-                            "line": 2,
-                            "column": 3,
-                            "message": 4
-
-                        },
-                        {
-                            "regexp": "ERROR in \\[at-loader\\] ([^:]*):(\\d+):(\\d+)\n(.*)",
-                            "file": 1,
-                            "line": 2,
-                            "column": 3,
-                            "message": 4
-                        }
-                    ],
-                    "severity": "warning",
-                    "source": "typescript",
-                    "background": {
-                        "activeOnStart": true,
-                        "beginsPattern": {
-                            "regexp": "webpack is watching the files…"
-                        },
-                        "endsPattern": {
-                            "regexp": "### Webpack finished compiling.*"
-                        }
-                    }
-                }
-            ]
+            "problemMatcher": [ "$ts-webpack-watch" ]
         },
         {
             "label": "clean",
             "type": "shell",
-            "command": "rm -rf out/ dist/ *.tsbuildinfo",
+            "command": "rm -rf out/ dist/ out-webview/ *.tsbuildinfo",
             "problemMatcher": [],
             "presentation": {
                 "echo": true,
@@ -94,22 +79,13 @@
                 "clear": true
             }
         },
-        /*
         {
-            "label": "watch-all",
-            "dependsOn": [
-                "ts-watch-extension",
-                "npm: webpack-watch-webviews"
-            ],
-            "dependsOrder": "parallel",
+            "type": "npm",
+            "script": "webpack-webviews",
             "problemMatcher": [
-                "$tsc-watch"
+                "$ts-webpack"
             ],
-            "isBackground": true,
-            "runOptions": {
-                "instanceLimit": 1,
-                "runOn": "folderOpen"
-            },
-        }*/
+            "label": "npm: webpack-webviews"
+        }
     ]
 }

@@ -12,30 +12,31 @@
 import ReactDOM from "react-dom";
 import React from "react";
 
-// import type CWWebview from "./CWWebview";
-import TestPage123 from "./pages/TestPage123";
+import ConnectionPage from "./pages/ConnectionPage";
 
 // tslint:disable no-console
 
-const obj = <TestPage123/>
-ReactDOM.render(obj, document.getElementById("root"));
+console.log(`REACT CLIENT LOADING`);
 
 window.addEventListener("message", (e: MessageEvent) => {
 
+    if (e.data.source !== "extension") {
+        console.log("I don't care about this message from " + e.data.source);
+        return;
+    }
+
     console.log("A MESSAGE!!!", e);
 
-    // const data = e.data as CWWebview.BaseMsg;
-    // if (data.type === "page") {
-    //     let obj: React.ReactElement;
+    const data = e.data;
+    if (data.type === "page") {
+        let obj: React.ReactElement;
 
-    //     const pageSelectorMsg = data as CWWebview.PageMsg;
-    //     if (pageSelectorMsg.page === "test1") {
-
-            // const obj = <TestPage123/>
-            // ReactDOM.render(obj, document.getElementById("root"));
-    //     }
-    //     else {
-    //         obj = <h1>Oh no you shouldn't see this</h1>
-    //     }
-    // }
+        if (data.connection) {
+            obj = <ConnectionPage connection={data.connection}/>
+        }
+        else {
+            obj = <h1>Oh no you shouldn't see this</h1>
+        }
+            ReactDOM.render(obj, document.getElementById("root"));
+    }
 });

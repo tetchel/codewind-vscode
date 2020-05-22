@@ -12,8 +12,9 @@
         "sourceMap": true,
         "declaration": true,
         "declarationMap": true,
+        "declarationDir": "out/@types",
         "importHelpers": true,
-        "noEmitOnError": true,
+        "noEmitOnError": false,
         "incremental": true,
         "removeComments": true,
 
@@ -28,11 +29,9 @@
         "downlevelIteration": true,
 
         "typeRoots": [
-            "node_modules/@types/",
-            "src/webview"
+            "./node_modules/@types/",
         ],
-        "types": [
-        ]
+        "types": []
     },
     "include": [
         "src",
@@ -40,9 +39,6 @@
     "exclude": [
         "node_modules",
         "src/webview",
-        // "src/test/"
     ],
-    "references": [
-        { "path": "tsconfig.webview.json" }
-    ]
+    "references": []
 }

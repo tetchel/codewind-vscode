@@ -9,22 +9,25 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-declare namespace CWWebview {
-    export type MessageTypes = "page" | "test";
-    export type Pages = "test1" | "test2";
+export namespace CWWebview {
+    export enum MessageTypesE {
+        PAGE = "page",
+    }
+
+    export enum PagesE {
+        "connection"
+    }
+
+    // export type MessageTypes = "page";
+    // export type Pages = "test1" | "test2";
 
     export interface BaseMsg {
-        type: MessageTypes;
+        type: MessageTypesE;
     }
 
     export interface PageMsg extends BaseMsg {
-        type: "page";
-        page: Pages;
-    }
-
-    export interface TestMsg extends BaseMsg {
-        type: "test";
-        thingo: string;
+        type: MessageTypesE.PAGE;
+        page: PagesE;
     }
 }
 

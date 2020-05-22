@@ -29,15 +29,20 @@ const EXTERNALS = {
  */
 const baseModuleRules = (tsconfig) => {
     return [{
-        test: /\.tsx?$/,
-        exclude: /node_modules/,
+        test: [
+            /\.tsx?$/,
+            // /\.d.ts$/,
+        ],
+        exclude: [
+            /\.d\.ts$/,
+            /node_modules/,
+        ],
         use: [{
-            loader: "awesome-typescript-loader",
+            loader: "ts-loader",
             options: {
-                useCache: true,
-                configFileName: path.resolve(__dirname, tsconfig),
+                configFile: path.resolve(__dirname, tsconfig),
             }
-        }],
+        }]
     }, {
         test: /\.node$/,
         use: "node-loader"
@@ -139,7 +144,9 @@ const testsConfig = (mode, argv) => {
  * @returns {import("webpack").Configuration}
  */
 const webviewJSConfig = (mode, argv) => {
-    const entry = path.resolve(__dirname, "src", "webview", "ReactClient.tsx");
+    const webviewDir = path.resolve(__dirname, "src", "webview");
+    const webviewTSConfig = path.join(webviewDir, "tsconfig.json");
+    const entry = path.join(webviewDir, "ReactClient.tsx");
     const outputFilename = "ReactClient.js";
 
     return {
@@ -149,7 +156,7 @@ const webviewJSConfig = (mode, argv) => {
         ...baseConfig(mode, argv),
         module: {
             rules: [
-                ...baseModuleRules("tsconfig.webview.json"), {
+                ...baseModuleRules(webviewTSConfig), {
                     test: /\.s[ac]ss$/i,
                     use: [
                         "style-loader",
@@ -164,6 +171,10 @@ const webviewJSConfig = (mode, argv) => {
             filename: outputFilename,
             // libraryTarget: "umd",
             devtoolModuleFilenameTemplate: "../[resource-path]",
+        },
+        externals: {
+            react: "React",
+            "react-dom": "ReactDOM"
         },
         plugins: [
             ...basePlugins(),

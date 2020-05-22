@@ -285,7 +285,7 @@ export namespace CLILifecycleWrapper {
         }
         else {
             const stoppedState = CLILifecycleCommands.STOP.transitionStates?.after;
-            if (stoppedState) {
+            if (stoppedState != null) {
                 LocalCodewindManager.instance.setState(stoppedState);
             }
         }

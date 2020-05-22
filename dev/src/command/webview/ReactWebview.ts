@@ -10,55 +10,77 @@
  *******************************************************************************/
 
 import * as vscode from "vscode";
-import * as fs from "fs-extra";
-import * as path from "path";
 
 import CWExtensionContext from "../../CWExtensionContext";
-import type CWWebview from "../../webview/CWWebview";
 import MCUtil from '../../MCUtil';
 import Log from '../../Logger';
+import CWWebview from "./pages/CWWebview";
 
 export default class ReactWebview {
 
     private readonly panel: vscode.WebviewPanel;
 
     constructor(
-        public readonly title: string
+        protected readonly id: string,
+        protected readonly title: string,
+        protected readonly pageID: CWWebview.PagesE,
     ) {
-        this.panel = vscode.window.createWebviewPanel("quack", title, vscode.ViewColumn.Active, {
+        const extensionPathUri = vscode.Uri.file(CWExtensionContext.get().extensionPath);
+
+        this.panel = vscode.window.createWebviewPanel(id, title, vscode.ViewColumn.Active, {
             enableScripts: true,
-            localResourceRoots: [ vscode.Uri.file(CWExtensionContext.get().vscContext.extensionPath) ],
+            localResourceRoots: [ extensionPathUri ],
         });
+
+        const extensionPathVSCodeUri = "vscode-resource://" + extensionPathUri.fsPath;
 
         this.panel.webview.html = `
-            <html>
-                <body>
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <title>${this.title}</title>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+
+                <base href="${extensionPathVSCodeUri}"/>
+
+                <script src="node_modules/react/umd/react.development.js"></script>
+                <script src="node_modules/react-dom/umd/react-dom.development.js"></script>
+
+                <script>
+                    const vscode = acquireVsCodeApi();
+                </script>
+            </head>
+            <body>
+                <div id="root">
                     <h1>Loading...</h1>
-                </body>
-            </html>`;
+                </div>
+                <script src="dist/ReactClient.js"></script>
+            </body>
+            </html>
+        `;
 
-        this.init().catch((err) => {
-            Log.e(`Error initializing React webview:`, err);
-            vscode.window.showErrorMessage(`Error opening webview: ${MCUtil.errToString(err)}`);
-        });
+        try {
+            this.init();
+        }
+        catch (err) {
+            Log.e(`Error initializing React webview ${title}:`, err);
+            vscode.window.showErrorMessage(`Error opening ${title}: ${MCUtil.errToString(err)}`);
+        }
     }
 
-    private async init(): Promise<void> {
-        const indexHtmlPath = path.join(CWExtensionContext.get().resourcesPath, "index.html");
-        const indexHtmlContents = await fs.readFile(indexHtmlPath);
-        this.panel.webview.html = indexHtmlContents.toString();
-        Log.d("Loaded the index file");
-
-        this.openPage("test1");
-        Log.d("Opened the test page");
+    protected init(): void {
+        // this.openPage("test1");
+        Log.d(`Open page "${this.pageID}"`);
+        this.openPage(this.pageID);
     }
 
-    private openPage(page: CWWebview.Pages): void {
-        this.postMessage<CWWebview.PageMsg>({ type: "page", page, });
+    private openPage(page: CWWebview.PagesE): void {
+        this.postMessage<CWWebview.PageMsg>({ type: CWWebview.MessageTypesE.PAGE, page, });
     }
 
-    public postMessage<T extends CWWebview.BaseMsg>(msg: T): void {
-        this.panel.webview.postMessage(msg);
+    protected postMessage<T extends {}>(msg: T): void {
+        this.panel.webview.postMessage({ source: "extension", ...msg });
     }
 
     public reveal(): void {

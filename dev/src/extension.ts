@@ -30,8 +30,8 @@ import MCUtil from "./MCUtil";
 import CLIWrapper from "./codewind/cli/CLIWrapper";
 import { CodewindStates } from "./codewind/connection/local/CodewindStates";
 import CWExtensionContext from "./CWExtensionContext";
-import ReactWebview from "./command/webview/ReactWebview";
 import Constants from "./constants/Constants";
+import ConnectionPage from "./command/webview/pages/ConnectionPage/ConnectionPage";
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -116,7 +116,11 @@ async function activateInner(context: vscode.ExtensionContext): Promise<void> {
     deletePendingDirs();
 
     const wv = () => {
-        const rwv = new ReactWebview(`🦆 ${Date.now().toString().substring(10)}`);
+        const conn = ConnectionManager.instance.connections[0];
+        if (conn == null) {
+            vscode.window.showErrorMessage("No connection");
+        }
+        const rwv = new ConnectionPage(conn);
         rwv.reveal();
     }
 

@@ -1,0 +1,48 @@
+[{
+        "regexp": "\\[at-loader\\] ([^:]*):(\\d+):(\\d+)\\s*[\r\n]]\\s*(.*)",
+        "file": 1,
+        "line": 2,
+        "column": 3,
+        "message": 4
+
+    },
+    {
+        "regexp": "(ERROR|WARNING) in \\[at-loader\\] ([^:]*):(\\d+):(\\d+)[\r\n](.*)",
+        "file": 1,
+        "line": 2,
+        "column": 3,
+        "message": 4
+    },
+    {
+        "fileLocation": "absolute",
+        "pattern": [{
+            "regexp": "\\[tsl\\] ERROR in ([^(]*)\\((\\d+),(\\d+)\\)\\s*[\r\n]\\s*(.*)",
+            "file": 1,
+            "line": 2,
+            "column": 3,
+            "message": 4
+        }],
+        "severity": "warning",
+        "source": "typescript",
+        "background": {
+            "activeOnStart": true,
+            "beginsPattern": {
+                "regexp": "webpack is watching the files…"
+            },
+            "endsPattern": {
+                "regexp": "### Webpack finished compiling.*"
+            }
+        }
+    },
+    {
+        "base": "$ts-webpack-watch",
+        "background": {
+            "beginsPattern": {
+                "regexp": "### Starting compilation..."
+            },
+            "endsPattern": {
+                "regexp": "### Webpack finished compiling"
+            }
+        }
+    }
+]
