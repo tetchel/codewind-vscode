@@ -15,33 +15,56 @@ import "../scss/app.scss";
 import React from "react";
 // import { Button } from "carbon-components-react";
 
-import type Connection from "codewind/connection/Connection";
+import WebviewMessages from "messages/WebviewMessages";
+import { filterMessage } from "../ReactClient";
 
 interface P {
-    connection: Connection
+    connection: WebviewMessages.ConnectionPageState;
 }
 
 interface S {
+    connection: WebviewMessages.ConnectionPageState;
 }
 
 export default class ConnectionPage extends React.Component<P, S> {
 
     constructor(props: P, state: S) {
         super(props, state);
-        console.log(`The connection is bbbbbb ` + this.props.connection.label);
+        this.state = {
+            connection: this.props.connection
+        };
+        console.log("Connection page initial state " + JSON.stringify(this.state));
+    }
+
+    public componentDidMount(): void {
+        console.log("Connection page did mount");
+
+        window.addEventListener("message", (e) => {
+            console.log("A MESSAGE TO THE CONNECTION PAGE", JSON.stringify(e));
+            if (!filterMessage(e, "connection")) {
+                return;
+            }
+
+            this.setState({ connection: e.data.connection });
+            console.log(`The connection is ` + this.props.connection.label);
+        });
     }
 
     public render(): React.ReactElement {
+        console.log("Rendering connection page");
+        if (this.state == null || this.state.connection == null) {
+            return (
+                <div>
+                    <h1>Error: No connection</h1>
+                </div>
+            );
+        }
+
         return (
             <div>
-                <h1>${this.props.connection.label}</h1>
-                <table>
-                    <tr>
-                        <td># Template Sources</td>
-                        {/* <td>${this.props.connection.templateSourcesList.get(). </td> */}
-                    </tr>
-                </table>
+                <h1>{this.state.connection.label}</h1>
+                <a href={this.state.connection.url.toString()}>{this.state.connection.url}</a>
             </div>
-        )
+        );
     }
 }

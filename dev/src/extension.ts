@@ -119,9 +119,17 @@ async function activateInner(context: vscode.ExtensionContext): Promise<void> {
         const conn = ConnectionManager.instance.connections[0];
         if (conn == null) {
             vscode.window.showErrorMessage("No connection");
+            return;
         }
-        const rwv = new ConnectionPage(conn);
-        rwv.reveal();
+
+        try {
+            const rwv = new ConnectionPage(conn);
+            rwv.reveal();
+        }
+        catch (err) {
+            vscode.window.showErrorMessage(`rwv failed ${err.message}`);
+            Log.e(`rwv failed`, err);
+        }
     }
 
     subscriptions.push(vscode.commands.registerCommand("ext.cw.hello-react", wv));

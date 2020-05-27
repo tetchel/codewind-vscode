@@ -11,14 +11,14 @@
 
 import ReactWebview from "../../ReactWebview";
 import Connection from "../../../../codewind/connection/Connection";
-import CWWebview from "../CWWebview";
+import Messages from "../../messages/WebviewMessages";
 
 export default class ConnectionPage extends ReactWebview {
 
     constructor(
         connection: Connection,
     ) {
-        super(connection.id, connection.label, CWWebview.PagesE.connection);
+        super(connection.id, connection.label, Messages.Pages.CONNECTION, { connection: Messages.stateify(connection) });
     }
 
 }

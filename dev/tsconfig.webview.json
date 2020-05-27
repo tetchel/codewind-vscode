@@ -12,6 +12,7 @@
 
         "outDir": "out-webview",
         "declarationDir": "out-webview",
+        "noEmitOnError": true,
 
         "baseUrl": ".",
         // This allows us to import types from the Codewind codebase.
@@ -19,7 +20,7 @@
         // https://www.typescriptlang.org/docs/handbook/module-resolution.html
         // https://stackoverflow.com/a/40326719
         "paths": {
-            "codewind/*": [ "out/@types/codewind/*" ]
+            "messages/*": [ "out/@types/command/webview/messages/*" ]
         },
     },
     "include": [

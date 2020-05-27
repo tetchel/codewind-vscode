@@ -42,7 +42,7 @@
             },
             "group": "build",
             "runOptions": {
-                "instanceLimit": 1,
+                "instanceLimit": 1
             }
         },
         {
@@ -63,13 +63,13 @@
                 "instanceLimit": 1,
                 "runOn": "folderOpen"
             },
-            "problemMatcher": [ "$ts-webpack-watch" ]
+            "problemMatcher": [
+                "$ts-webpack-watch"
+            ]
         },
         {
-            "label": "clean",
-            "type": "shell",
-            "command": "rm -rf out/ dist/ out-webview/ *.tsbuildinfo",
-            "problemMatcher": [],
+            "type": "npm",
+            "script": "clean",
             "presentation": {
                 "echo": true,
                 "reveal": "never",
@@ -77,7 +77,9 @@
                 "panel": "shared",
                 "showReuseMessage": true,
                 "clear": true
-            }
+            },
+            "problemMatcher": [],
+            "label": "npm: clean"
         },
         {
             "type": "npm",

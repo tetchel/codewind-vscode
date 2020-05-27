@@ -5,9 +5,8 @@
 "use strict";
 
 const path = require("path");
-// const webpack = require("webpack");
-const { CheckerPlugin } = require("awesome-typescript-loader");
 const { FailOnCriticalDependencyPlugin, VSCodeTaskHelperPlugin } = require("./webpack-plugins");
+const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin").default;
 
 const BUNDLE_DIR = "dist";
 const OUTPUT_DIR = path.resolve(__dirname, BUNDLE_DIR);
@@ -25,9 +24,11 @@ const EXTERNALS = {
 };
 
 /**
- * @param {string} tsconfig - tsconfig file relative to this file
+ * @param {string} tsconfig - tsconfig file abspath
  */
 const baseModuleRules = (tsconfig) => {
+    console.log("TSConfig is " + tsconfig);
+
     return [{
         test: [
             /\.tsx?$/,
@@ -40,7 +41,7 @@ const baseModuleRules = (tsconfig) => {
         use: [{
             loader: "ts-loader",
             options: {
-                configFile: path.resolve(__dirname, tsconfig),
+                configFile: tsconfig,
             }
         }]
     }, {
@@ -53,7 +54,6 @@ const basePlugins = () => {
     return [
         new FailOnCriticalDependencyPlugin(),
         new VSCodeTaskHelperPlugin(),
-        new CheckerPlugin(),
     ];
 }
 
@@ -86,7 +86,7 @@ const vscodeConfig = (mode, argv) => {
         name: "extension",
         ...baseConfig(mode, argv),
         module: {
-            rules: baseModuleRules("tsconfig.json"),
+            rules: baseModuleRules(path.resolve(__dirname, "tsconfig.json")),
         },
         target: "node", // vscode extensions run in a Node.js-context 📖 -> https://webpack.js.org/configuration/node
         entry,
@@ -145,9 +145,11 @@ const testsConfig = (mode, argv) => {
  */
 const webviewJSConfig = (mode, argv) => {
     const webviewDir = path.resolve(__dirname, "src", "webview");
-    const webviewTSConfig = path.join(webviewDir, "tsconfig.json");
+    const webviewTSConfig = path.join(__dirname, "tsconfig.webview.json");
     const entry = path.join(webviewDir, "ReactClient.tsx");
     const outputFilename = "ReactClient.js";
+
+    const extensions = [ ".ts", ".js", ".tsx", ".jsx", ".scss" ];
 
     return {
         name: "webview",
@@ -180,7 +182,10 @@ const webviewJSConfig = (mode, argv) => {
             ...basePlugins(),
         ],
         resolve: {
-            extensions: [ ".ts", ".js", ".tsx", ".jsx", ".d.ts", ".scss" ]
+            extensions,
+            plugins: [
+                new TsconfigPathsPlugin({ configFile: webviewTSConfig })
+            ]
         }
     };
 }

@@ -14,7 +14,7 @@ import * as vscode from "vscode";
 import CWExtensionContext from "../../CWExtensionContext";
 import MCUtil from '../../MCUtil';
 import Log from '../../Logger';
-import CWWebview from "./pages/CWWebview";
+import WebviewMessages from "./messages/WebviewMessages";
 
 export default class ReactWebview {
 
@@ -23,7 +23,8 @@ export default class ReactWebview {
     constructor(
         protected readonly id: string,
         protected readonly title: string,
-        protected readonly pageID: CWWebview.PagesE,
+        protected readonly pageID: WebviewMessages.Pages,
+        readonly initialState: {},
     ) {
         const extensionPathUri = vscode.Uri.file(CWExtensionContext.get().extensionPath);
 
@@ -32,7 +33,7 @@ export default class ReactWebview {
             localResourceRoots: [ extensionPathUri ],
         });
 
-        const extensionPathVSCodeUri = "vscode-resource://" + extensionPathUri.fsPath;
+        const extensionPathVSCodeUri = "vscode-resource://" + extensionPathUri.fsPath + "/";
 
         this.panel.webview.html = `
             <!DOCTYPE html>
@@ -48,6 +49,7 @@ export default class ReactWebview {
                 <script src="node_modules/react-dom/umd/react-dom.development.js"></script>
 
                 <script>
+                    console.log("Base href is ${extensionPathVSCodeUri}");
                     const vscode = acquireVsCodeApi();
                 </script>
             </head>
@@ -61,7 +63,7 @@ export default class ReactWebview {
         `;
 
         try {
-            this.init();
+            this.init(initialState);
         }
         catch (err) {
             Log.e(`Error initializing React webview ${title}:`, err);
@@ -69,18 +71,20 @@ export default class ReactWebview {
         }
     }
 
-    protected init(): void {
+    protected init(state: object): void {
         // this.openPage("test1");
         Log.d(`Open page "${this.pageID}"`);
-        this.openPage(this.pageID);
+        this.openPage(this.pageID, state);
     }
 
-    private openPage(page: CWWebview.PagesE): void {
-        this.postMessage<CWWebview.PageMsg>({ type: CWWebview.MessageTypesE.PAGE, page, });
+    private openPage(page: WebviewMessages.Pages, state: object): void {
+        this.postMessage<WebviewMessages.PageMsg>({ type: WebviewMessages.MessageTypes.PAGE, page, state });
     }
 
     protected postMessage<T extends {}>(msg: T): void {
-        this.panel.webview.postMessage({ source: "extension", ...msg });
+        msg = { source: "extension", ...msg };
+        Log.d(`Posting message`, msg);
+        this.panel.webview.postMessage(msg);
     }
 
     public reveal(): void {

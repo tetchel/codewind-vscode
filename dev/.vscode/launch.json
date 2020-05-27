@@ -16,7 +16,8 @@
                 "/Users/tim/vscode-codewind-workspace"
             ],
             "outFiles": [
-                "${workspaceFolder}/out/**/*.js"
+                "${workspaceFolder}/out/**/*.js",
+                "${workspaceFolder}/dist/**/*.js",
             ],
             "preLaunchTask": "ts-watch-extension",
             "env": {

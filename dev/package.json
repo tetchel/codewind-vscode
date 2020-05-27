@@ -52,7 +52,8 @@
         "copy-license": "cp -v ../LICENSE ../README.md .",
         "webpack-webviews": "webpack --env dev --config-name webview",
         "webpack-watch-webviews": "webpack --info-verbosity verbose --env dev --watch --config-name webview",
-        "webpack-prod": "webpack --env prod"
+        "webpack-prod": "webpack --env prod",
+        "clean": "rm -rf out/ dist/ out-webview/ *.tsbuildinfo"
     },
     "devDependencies": {
         "@types/carbon-components-react": "^7.10.0",
@@ -70,7 +71,6 @@
         "@types/vscode": "1.39.0",
         "@types/webpack": "^4.41.10",
         "@types/webpack-env": "^1.15.1",
-        "awesome-typescript-loader": "^5.2.1",
         "chai": "^4.2.0",
         "css-loader": "^3.5.2",
         "minimist": "^1.2.5",
@@ -80,6 +80,7 @@
         "sass-loader": "^8.0.2",
         "style-loader": "^1.1.4",
         "ts-loader": "^7.0.3",
+        "tsconfig-paths-webpack-plugin": "^3.2.0",
         "tslint": "^6.1.1",
         "typescript": "^3.8.3",
         "vsce": "^1.75.0",

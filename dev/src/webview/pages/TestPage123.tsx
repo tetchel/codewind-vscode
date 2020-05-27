@@ -38,7 +38,7 @@ export default class TestPage123 extends React.Component<{}, { thingo: string }>
     }
 
     private handleWindowEvent(e: MessageEvent): void {
-        // const testMsg = e.data as CWWebview.TestMsg;
+        // const testMsg = e.data as WebviewMessages.TestMsg;
         const testMsg = e.data;
         if (testMsg.thingo) {
             this.setState({ thingo: testMsg.thingo });
